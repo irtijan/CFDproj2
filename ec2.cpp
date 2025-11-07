@@ -5,6 +5,8 @@
 int main() {
     double xi = 0.0;                                    // intial x
     double xf = 1.0;                                    // final x
+    double x0 = 0.25;                                   // ic
+    double d = 0.1;                                     // ic
 
     int M = 32;                                         // number of physical cells
     double dx = (xf - xi) / M;                          // grid spacing
@@ -13,26 +15,34 @@ int main() {
     double T = 3.0 / (2.0 * a);                         // simulation duration
     std::vector<double> v = {1.0, 0.75, 0.5, 0.25};     // cfl numbers
 
-    std::vector<double> u(M + 2);                       // empty u at t = n
-    std::vector<double> unew(u.size());                 // u at t = n + 1
-    std::vector<double> uexact(unew.size());            // exact u
+    std::vector<double> u(M + 2);                           // empty u at t = n
+    std::vector<double> unew(u.size());                     // u at t = n + 1
+    std::vector<double> uexact(unew.size());                // exact u
 
-    double Aexact = 1.0;                                // exact amp
-    double phiexact = -2.0 * M_PI * a * T;              // exact phase
+    double Aexact = 0.19489360078929982;                    // exact amp
+    double phiexact = 0.0;                                  // exact phase
 
-    std::vector<double> q(4);                           // diffusion coeffs
-    double t;                                           // time
-    double dt;                                          // time step
-    double Re;                                          // real part amp
-    double Im;                                          // imag part amp
-    double Anum;                                        // numerical amp
-    double phinum;                                      // numerical phase
-    double amp_error;                                   // amp error
-    double phase_error;                                 // phase error
-    double L1norm;                                      // L1norm
+    std::vector<double> q(4);                               // diffusion coeffs
+    double t;                                               // time
+    double dt;                                              // time step
+    double Re;                                              // real part amp
+    double Im;                                              // imag part amp
+    double Anum;                                            // numerical amp
+    double phinum;                                          // numerical phase
+    double amp_error;                                       // amp error
+    double phase_error;                                     // phase error
+    double L1norm;                                          // L1norm
 
     for (int i = 1; i < uexact.size() - 1; i++) {           // loop to compute exact u
-        uexact[i] = std::sin(2.0 * M_PI * (dx * (i - 1.0) - a * T));
+        double x = dx * (i - 1.0);
+        double xp = x - a * T;                              // shifted position
+        if (xp < 0.0) {xp += 1.0;}                          // periodic wrap
+        if (xp > 1.0) {xp -= 1.0;}
+
+        if (xp >= x0 - d && xp <= x0 + d) {
+            uexact[i] = std::cos(M_PI * (xp - x0) / (2.0 * d))
+                        * std::cos(M_PI * (xp - x0) / (2.0 * d));}
+        else {uexact[i] = 0.0;}
     }
 
     for (int i = 0; i < v.size(); i++) {                    // loop to compute for all v and q
@@ -48,16 +58,19 @@ int main() {
                       
         for (int k = 0; k < q.size(); k++) {
 
-            for (int x = 1; x < u.size() - 1; x++) {        // u with ics at t = 0
-                u[x] = std::sin(2.0 * M_PI * dx * (x - 1.0));
+            for (int x = 1; x < u.size() - 1; x++) {            // u with ics at t = 0
+                if (dx * (x - 1.0) >= x0 - d && dx * (x - 1.0) <= x0 + d) 
+                {u[x] = std::cos(M_PI * (dx * (x - 1.0) - x0) / (2 * d)) 
+                    * std::cos(M_PI * (dx * (x - 1.0) - x0) / (2 * d));}
+                else {u[x] = 0.0;}
             }
 
-            u[0] = u[u.size() - 2];                         // periodic bcs
+            u[0] = u[u.size() - 2];                             // periodic bcs
             u[u.size() - 1] = u[1];
 
             t = 0.0;
 
-            while (t + dt <= T) {                           // loop to update u with bcs until t = T
+            while (t + dt <= T) {                               // loop to update u with bcs until t = T
                 t += dt;
                 for (int j = 1; j < u.size() - 1; j++) {
                     unew[j] = 0.5 * (q[k] + v[i]) * u[j - 1] + (1.0 - q[k]) * u[j] + 0.5 * (q[k] - v[i]) * u[j + 1];
@@ -70,7 +83,7 @@ int main() {
             Re = 0.0;
             Im = 0.0;
 
-            for (int r = 1; r < unew.size() - 1; r++) {     // loop to compute amp parts
+            for (int r = 1; r < unew.size() - 1; r++) {          // loop to compute amp parts
                 Re += unew[r] * std::cos(2.0 * M_PI * dx * (r - 1));
                 Im -= unew[r] * std::sin(2.0 * M_PI * dx * (r - 1));
             }

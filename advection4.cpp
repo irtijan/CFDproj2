@@ -14,11 +14,11 @@ int main() {
     double T = 0.5 / a;                                 // simulation duration
     std::vector<double> v = {1.0, 0.75, 0.5, 0.25};     // cfl numbers
 
-    std::vector<double> u(M + 2);                           // empty u at t = n
-    std::vector<double> unew(u.size());                     // u at t = n + 1
-    std::vector<double> uexact(unew.size());                // exact u
+    std::vector<double> u(M + 2);                       // empty u at t = n
+    std::vector<double> unew(u.size());                 // u at t = n + 1
+    std::vector<double> uexact(unew.size());            // exact u
 
-    for (int d = 1; d < uexact.size() - 1; d++) {           // loop to compute exact u
+    for (int d = 1; d < uexact.size() - 1; d++) {       // loop to compute exact u
         if (dx * (d - 1) - a * T <= 0.25) {uexact[d] = 1.0;}
         else {uexact[d] = 0.0;}
     }
@@ -45,7 +45,7 @@ int main() {
 
         t = 0.0;
 
-        while (t + dt <= T) {                           // loop to update u with bcs until t = T
+        while (t + dt <= T) {                               // loop to update u with bcs until t = T
             t += dt;
             for (int j = 1; j < u.size() - 1; j++) {
                 du[0] = u[j + 1] - u[j];
@@ -53,7 +53,7 @@ int main() {
                 if (j == 1) {du[2] = du[1];}
                 else {du[2] = u[j - 1] - u[j - 2];}
 
-                for (int b = 0; b < B.size(); b++) {    // loop to compute B terms
+                for (int b = 0; b < B.size(); b++) {        // loop to compute B terms
                     if ((du[b] > 0.0 ? 1.0 : -1.0) != (du[b + 1] > 0.0 ? 1.0 : -1.0)) {B[b] = 0.0;}
                     else if (du[b] != 0.0 && du[b + 1] != 0.0 &&
                         du[b] / du[b + 1] >= 0.5 && du[b] / du[b + 1] <= 2.0) 
@@ -70,7 +70,7 @@ int main() {
             }
 
             L1norm = 0.0;
-            for (int l = 1; l < uexact.size() - 1; l++) {           // loop to compute L1norm
+            for (int l = 1; l < uexact.size() - 1; l++) {   // loop to compute L1norm
                 L1norm += std::abs(unew[l] - uexact[l]);
             }
             L1norm = L1norm / M;

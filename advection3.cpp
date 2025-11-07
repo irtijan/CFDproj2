@@ -13,20 +13,20 @@ int main() {
     std::vector<double> T {0.5 / a, 1.0 / a};           // simulation duration
     std::vector<double> v = {1.0, 0.75, 0.5, 0.25};     // cfl numbers
 
-    std::vector<double> u(M + 2);                           // empty u at t = n
-    std::vector<double> unew(u.size());                     // u at t = n + 1
-    std::vector<double> uexact(unew.size());                // exact u
+    std::vector<double> u(M + 2);                       // empty u at t = n
+    std::vector<double> unew(u.size());                 // u at t = n + 1
+    std::vector<double> uexact(unew.size());            // exact u
 
-    std::vector<double> q(4);                               // diffusion coeffs
-    double t;                                               // time
-    double dt;                                              // time step
-    double L1norm;                                          // L1norm
+    std::vector<double> q(4);                           // diffusion coeffs
+    double t;                                           // time
+    double dt;                                          // time step
+    double L1norm;                                      // L1norm
 
-    for (int i = 0; i < v.size(); i++) {                    // loop to compute for all v, q, aT
+    for (int i = 0; i < v.size(); i++) {                // loop to compute for all v, q, aT
 
-        std::print("v = {:.2f}\n", v[i]);                   // print v to terminal
+        std::print("v = {:.2f}\n", v[i]);               // print v to terminal
 
-        dt = v[i] * dx / a;                                 // time step
+        dt = v[i] * dx / a;                             // time step
 
         q = {1,
             std::abs(v[i]),
