@@ -18,6 +18,11 @@ int main() {
     std::vector<double> unew(u.size());                     // u at t = n + 1
     std::vector<double> uexact(unew.size());                // exact u
 
+    for (int d = 1; d < uexact.size() - 1; d++) {           // loop to compute exact u
+        if (dx * (d - 1) - a * T <= 0.25) {uexact[d] = 1.0;}
+        else {uexact[d] = 0.0;}
+    }
+
     double t;                                               // time
     double dt;                                              // time step
     double L1norm;                                          // L1norm
@@ -62,11 +67,6 @@ int main() {
             unew[0] = 1.0;
             unew[unew.size() - 1] = unew[unew.size() - 2];
             u = unew;
-            }
-
-            for (int d = 1; d < uexact.size() - 1; d++) {           // loop to compute exact u
-                if (dx * (d - 1) - a * T <= 0.25) {uexact[d] = 1.0;}
-                else {uexact[d] = 0.0;}
             }
 
             L1norm = 0.0;
